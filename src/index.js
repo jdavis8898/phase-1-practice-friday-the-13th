@@ -7,28 +7,47 @@ const watchedElement = document.getElementById("watched")
 const amountElement = document.getElementById("amount")
 const bloodFormElement = document.getElementById("blood-form")
 const bloodAmountElement = document.getElementById("blood-amount")
+let currentMovie
+let watchStatus
 
 fetch("http://localhost:3000/movies")
 .then(response => response.json())
 .then(movies => {
-    movies.forEach(movie => {
-        const imageElement = document.createElement("img")
-        imageElement.src = movie.image
-        movieListElement.appendChild(imageElement)
-        imageElement.addEventListener("click", () => {displayMovie(movie)})
-    })
-
+    movies.forEach(movie => createNavBar(movie))
     displayMovie(movies[0])
 })
 
+function createNavBar(movie)
+{
+    const imageElement = document.createElement("img")
+    imageElement.src = movie.image
+    movieListElement.appendChild(imageElement)
+    imageElement.addEventListener("click", () => {displayMovie(movie)})
+}
+
 function displayMovie(movie)
 {
+    currentMovie = movie
     titleElement.textContent = movie.title
     yearReleasedElement.textContent = movie.release_year
     descriptionElement.textContent = movie.description
     detailImageElement.src = movie.image
     amountElement.textContent = movie.blood_amount
+    watchedOrNot(movie)
 
+    // if (movie.watched === true)
+    // {
+    //     watchedElement.textContent = "Watched"
+    // }
+
+    // else
+    // {
+    //     watchedElement.textContent = "Unwatched"
+    // } 
+}
+
+function watchedOrNot(movie)
+{
     if (movie.watched === true)
     {
         watchedElement.textContent = "Watched"
