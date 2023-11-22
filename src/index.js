@@ -5,6 +5,8 @@ const yearReleasedElement = document.querySelector("div#movie-info h3#year-relea
 const descriptionElement = document.querySelector("div#movie-info p#description")
 const buttonWatchedElement = document.querySelector("div#movie-info button#watched")
 const bloodAmountElement = document.querySelector("div#movie-info span#amount")
+const bloodForm = document.querySelector("div#movie-info form#blood-form")
+const bloodInput = bloodForm.querySelector("#blood-amount")
 let currentMovie
 
 function getMovies()
@@ -18,8 +20,23 @@ function getMovies()
             displayMovie(movies[0])
 
             toggleWatchedButton()
+
+            retrieveBloodAmount()
         })
 }
+
+function patchBlood(urlId, patchData)
+{
+    return fetch(`http://localhost:3000/movies/${urlId}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "Application/json"
+        },
+        body: JSON.stringify(patchData)
+    })
+        .then(response => response.json())
+}
+
 function createNavBar (movies)
 {
     movies.forEach(movie => {
@@ -48,6 +65,26 @@ function toggleWatchedButton()
     buttonWatchedElement.addEventListener("click", () => {
         currentMovie.watched = !currentMovie.watched
         buttonWatchedElement.innerText = currentMovie.watched ? "Watched" : "Unwatched"
+    })
+}
+
+function retrieveBloodAmount()
+{
+    bloodForm.addEventListener("submit", (e) => {
+        e.preventDefault()
+
+        currentMovie.blood_amount += parseInt(e.target["blood-amount"].value)
+        // currentMovie.blood_amount += parseInt(bloodInput.value)
+
+        let patchData = {blood_amount: currentMovie.blood_amount}
+
+        patchBlood(currentMovie.id, patchData)
+            .then(patchedMovie => { //2nd .then gices us the data from the db.json
+                bloodAmountElement.innerText = patchedMovie.blood_amount
+            })
+        
+        bloodForm.reset()
+        //e.target["blood-amount"].value = ""
     })
 }
 
