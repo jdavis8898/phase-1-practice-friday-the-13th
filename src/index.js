@@ -1,88 +1,54 @@
-const titleElement = document.getElementById("title")
-const yearReleasedElement = document.getElementById("year-released")
-const descriptionElement = document.getElementById("description")
-const movieListElement = document.getElementById("movie-list")
-const detailImageElement = document.getElementById("detail-image")
-const watchedElement = document.getElementById("watched")
-const amountElement = document.getElementById("amount")
-const bloodFormElement = document.getElementById("blood-form")
-const bloodAmountElement = document.getElementById("blood-amount")
+const movieListElement = document.querySelector("#movie-list")
+const detailImageElement = document.querySelector("div#movie-info img#detail-image")
+const titleElement = document.querySelector("div#movie-info h1#title")
+const yearReleasedElement = document.querySelector("div#movie-info h3#year-released")
+const descriptionElement = document.querySelector("div#movie-info p#description")
+const buttonWatchedElement = document.querySelector("div#movie-info button#watched")
+const bloodAmountElement = document.querySelector("div#movie-info span#amount")
 let currentMovie
-let watchStatus
 
-fetch("http://localhost:3000/movies")
-.then(response => response.json())
-.then(movies => {
-    movies.forEach(movie => createNavBar(movie))
-    displayMovie(movies[0])
-})
-
-function createNavBar(movie)
+function getMovies()
 {
-    const imageElement = document.createElement("img")
-    imageElement.src = movie.image
-    movieListElement.appendChild(imageElement)
-    imageElement.addEventListener("click", () => {displayMovie(movie)})
+    fetch("http://localhost:3000/movies")
+        .then(response => response.json())
+        .then(movies => {
+            
+            createNavBar(movies)
+
+            displayMovie(movies[0])
+
+            toggleWatchedButton()
+        })
+}
+function createNavBar (movies)
+{
+    movies.forEach(movie => {
+        const navBarImageElement = document.createElement("img")
+        navBarImageElement.src = movie.image
+        movieListElement.appendChild(navBarImageElement)
+
+        navBarImageElement.addEventListener("click", () => displayMovie(movie))
+    })
 }
 
 function displayMovie(movie)
 {
     currentMovie = movie
-    titleElement.textContent = movie.title
-    yearReleasedElement.textContent = movie.release_year
-    descriptionElement.textContent = movie.description
+
     detailImageElement.src = movie.image
-    amountElement.textContent = movie.blood_amount
-    watchedOrNot(movie)
-
-    // if (movie.watched === true)
-    // {
-    //     watchedElement.textContent = "Watched"
-    // }
-
-    // else
-    // {
-    //     watchedElement.textContent = "Unwatched"
-    // } 
+    titleElement.innerText = movie.title
+    yearReleasedElement.innerText = movie.release_year
+    descriptionElement.innerText = movie.description
+    buttonWatchedElement.innerText = movie.watched ? "Watched" : "Unwatched"
+    bloodAmountElement.innerText = movie.blood_amount
 }
 
-function watchedOrNot(movie)
+function toggleWatchedButton()
 {
-    if (movie.watched === true)
-    {
-        watchedElement.textContent = "Watched"
-    }
-
-    else
-    {
-        watchedElement.textContent = "Unwatched"
-    } 
+    buttonWatchedElement.addEventListener("click", () => {
+        currentMovie.watched = !currentMovie.watched
+        buttonWatchedElement.innerText = currentMovie.watched ? "Watched" : "Unwatched"
+    })
 }
 
-watchedElement.addEventListener("click", () => {
-    if (watchedElement.textContent === "Watched")
-    {
-        watchedElement.textContent = "Unwatched"
-    }
-
-    else
-    {
-        watchedElement.textContent = "Watched"
-    }
-})
-
-bloodFormElement.addEventListener("submit", (event) => {
-    event.preventDefault()
-
-    if (isNaN(Number(bloodAmountElement.value))) {
-        alert("Error: That's NOT a number! Please try again.")
-    }
-    
-    else {
-        let newBloodAmount = Number(bloodAmountElement.value) + Number(amountElement.textContent)
-        amountElement.textContent = newBloodAmount
-        console.log(newBloodAmount)
-    }
-
-    bloodFormElement.reset()
-})
+getMovies()
